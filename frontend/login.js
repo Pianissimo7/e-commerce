@@ -25,10 +25,11 @@ function login() {
             console.log('Login successful');
             // Redirect or perform other actions for a successful login
         } else {
-            loginError.textContent = 'Invalid email or password';
+            loginError.textContent = data.message || 'An error occurred during login';
         }
     })
     .catch(error => {
         console.error('Error during login:', error);
+        loginError.textContent = 'An error occurred during login';
     });
 }

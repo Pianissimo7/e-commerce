@@ -1,3 +1,4 @@
+// register.js
 function register() {
     var name = document.getElementById('name').value;
     var email = document.getElementById('email').value;
@@ -20,7 +21,7 @@ function register() {
     };
 
     // Send the JSON object to the server using the Fetch API
-    fetch('http://localhost:5000/receive_data', {
+    fetch('http://localhost:5000/register', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -30,9 +31,15 @@ function register() {
     .then(response => response.json())
     .then(data => {
         // Handle the response from the server
-        console.log('Server Response:', data);
+        if (data.success) {
+            console.log('Registration successful');
+            // Redirect or perform other actions for a successful registration
+        } else {
+            // Display the error message
+            console.error('Registration error:', data.message);
+        }
     })
     .catch(error => {
-        console.error('Error sending data to the server:', error);
+        console.error('Error during registration:', error);
     });
 }
