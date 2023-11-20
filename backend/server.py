@@ -1,11 +1,23 @@
 from flask import Flask, request, jsonify
 from flask_login import LoginManager, UserMixin, login_user, current_user, login_required
 import mysql.connector
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'abcdefghijklmnopqrstuvwxyz'
+app.secret_key = os.environ.get("APP_SECRET_KEY")
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+# DB config used for accessing the database
+db_config = {
+    'host': os.environ.get("HOST"),
+    'user': os.environ.get("DATABASE_USERNAME"),
+    'password': os.environ.get("DATABASE_PASSWORD"),
+    'database': os.environ.get("DATABASE_NAME"),
+}
 
 class User(UserMixin):
     def __init__(self, id, name, email, password):
@@ -13,6 +25,7 @@ class User(UserMixin):
         self.name = name
         self.email = email
         self.password = password
+
 @login_manager.user_loader
 def load_user(email):
 
@@ -28,16 +41,10 @@ def load_user(email):
     # Close the cursor and connection
     cursor.close()
     connection.close()
+
     if user:
         return User(user[2], *user[1:])
     return None
-
-db_config = {
-    'host': '127.0.0.1',
-    'user': 'root',
-    'password': 'Edaniel7',
-    'database': 'db'
-}
 
 def user_exists(email):
     # Establish a connection to the database
@@ -118,12 +125,13 @@ def login():
     else:
         return error_response('Invalid email or password', 401)
 
+# Route for handling edit_profile requests
 @app.route('/edit_profile', methods=['POST'])
 @login_required
 def edit_profile():
     user_data_json = request.get_json()
 
-    # Check if the user with the given email already exists
+    # Check if the new email is already in use by another user
     if current_user.email != user_data_json['email'] and user_exists(user_data_json['email']):
         print(f"User with email {user_data_json['email']} already exists.")
         return error_response('email is already in use', 401)
@@ -144,4 +152,6 @@ def edit_profile():
     return success_response(message='Profile updated successfully')
 
 if __name__ == '__main__':
+    
+    # run the server
     app.run(debug=True)
