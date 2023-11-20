@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
-from flask_login import LoginManager, UserMixin, login_user, current_user, login_required
+from flask_login import LoginManager, login_user, current_user, login_required
 import mysql.connector
+import os
 from dotenv import load_dotenv
+from User import User
 
 # Load environment variables from .env file
 load_dotenv()
@@ -18,13 +20,6 @@ db_config = {
     'password': os.environ.get("DATABASE_PASSWORD"),
     'database': os.environ.get("DATABASE_NAME"),
 }
-
-class User(UserMixin):
-    def __init__(self, id, name, email, password):
-        self.id = id
-        self.name = name
-        self.email = email
-        self.password = password
 
 @login_manager.user_loader
 def load_user(email):
@@ -152,6 +147,4 @@ def edit_profile():
     return success_response(message='Profile updated successfully')
 
 if __name__ == '__main__':
-    
-    # run the server
     app.run(debug=True)
