@@ -151,6 +151,28 @@ def edit_profile():
 
     return success_response(message='Profile updated successfully')
 
+# Route for handling ordering requests
+@app.route('/order', methods=['POST'])
+def order():
+    order_data_json = request.get_json()
+    
+    # Establish a connection to the database
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor()
+    
+    # Insert the new order into the database
+    insert_query = "INSERT INTO orders (customer_email, product_id, quantity, delivery_status, purchase_date) VALUES (%s, %s, %s, %s)"
+    order_data = (order_data_json['email'], order_data_json['product_id'], order_data_json['quantity'], order_data_json['delivery_status'], order_data_json['purchase_date'])
+    cursor.execute(insert_query, order_data)
+    connection.commit()
+    print(f"Order registered successfully.")
+
+    # Close the cursor and connection
+    cursor.close()
+    connection.close()
+
+    return success_response(message='Order successful')
+
 if __name__ == '__main__':
     
     # run the server
