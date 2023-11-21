@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import mysql.connector
+from user import User
 import os
 
 # Load environment variables from .env file
@@ -23,11 +24,18 @@ def get_user_by_email(email):
     cursor.execute(select_query, (email,))
     user = cursor.fetchone()
 
-    # Close the cursor and connection
-    cursor.close()
-    connection.close()
+    if user:
+        column_names = [column[0] for column in cursor.description]
+        user_dict = {column: value for column, value in zip(column_names, user)}
 
-    return user
+        # Close the cursor and connection
+        cursor.close()
+        connection.close()
+
+        # email is used for the id as it is the primary key
+        return User(user_dict["email"], user_dict["name"], user_dict["email"], user_dict["password"])
+    else:
+        return None
 
 def user_exists(email):
     # Establish a connection to the database

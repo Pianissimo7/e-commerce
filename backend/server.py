@@ -15,9 +15,7 @@ def load_user(email):
 
     user = get_user_by_email(email)
     
-    if user:
-        return User(user[2], *user[1:])
-    return None
+    return user
 
 def success_response(data=None, message=None):
     response = {'success': True}
@@ -52,8 +50,8 @@ def login():
     user = get_user_by_email(login_data_json['email'])
 
     # Check if the user exists and the password is correct
-    if user and user[3] == login_data_json['password']:
-        login_user(User(user[2], *user[1:]))
+    if user and user.password == login_data_json['password']:
+        login_user(user)
         return success_response(message='Login successful')
     else:
         return error_response('Invalid email or password', 401)
