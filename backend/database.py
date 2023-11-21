@@ -1,22 +1,11 @@
 from dotenv import load_dotenv
 import mysql.connector
 from user import User
-import os
-
-# Load environment variables from .env file
-load_dotenv()
-
-# DB config used for accessing the database
-db_config = {
-    'host': os.environ.get("HOST"),
-    'user': os.environ.get("DATABASE_USERNAME"),
-    'password': os.environ.get("DATABASE_PASSWORD"),
-    'database': os.environ.get("DATABASE_NAME"),
-}
+from consts import db_config
 
 def get_user_by_email(email):
     connection = mysql.connector.connect(**db_config)
-    cursor = connection.cursor()
+    cursor = connection.cursor(dictionary=True)
 
     select_query = "SELECT * FROM users WHERE email = %s"
     cursor.execute(select_query, (email,))

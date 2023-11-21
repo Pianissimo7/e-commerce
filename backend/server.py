@@ -59,6 +59,7 @@ def login():
 @login_required
 def edit_profile():
     user_data_json = request.get_json()
+    # user_data_json = request.json()
 
     if current_user.email != user_data_json['email'] and user_exists(user_data_json['email']):
         print(f"User with email {user_data_json['email']} already exists.")
