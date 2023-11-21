@@ -11,9 +11,9 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 @login_manager.user_loader
-def load_user(email):
+def load_user(id):
 
-    user = get_user_by_email(email)
+    user = get_user_by_id(id)
     
     return user
 
@@ -33,8 +33,8 @@ def error_response(message, status_code):
 def register():
     user_data_json = request.json()
 
-    if user_exists(user_data_json['email']):
-        print(f"User with email {user_data_json['email']} already exists.")
+    if user_exists(user_data_json['email'], user_data_json['password']):
+        print(f"User with name {user_data_json['name']} and email {user_data_json['email']} already exists.")
         return error_response('Email already taken', 401)
     else:
         add_user(user_data_json['name'], user_data_json['email'], user_data_json['password'])
@@ -45,8 +45,8 @@ def register():
 # Route for handling login requests
 @app.route('/login', methods=['POST'])
 def login():
-    login_data_json = request.json()
-    user = get_user_by_email(login_data_json['email'])
+    login_data_json = request.json
+    user = get_user_by_email_pass(login_data_json['email'], login_data_json['password'])
 
     if user and user.password == login_data_json['password']:
         login_user(user)
@@ -58,13 +58,14 @@ def login():
 @app.route('/edit_profile', methods=['POST'])
 @login_required
 def edit_profile():
-    user_data_json = request.json()
+    user_data_json = request.json
 
-    if current_user.email != user_data_json['email'] and user_exists(user_data_json['email']):
-        print(f"User with email {user_data_json['email']} already exists.")
-        return error_response('email is already in use', 401)
+    taken_user = get_user_by_email_pass(user_data_json['email'], user_data_json['password'])
+    if taken_user is not None and taken_user.id != current_user.id:
+        print(f"User with name {user_data_json['name']} and email {user_data_json['email']} already exists.")
+        return error_response('Email is already in use', 401)
 
-    update_user(user_data_json['name'], user_data_json['password'], user_data_json['email'], current_user.email)
+    update_user(user_data_json['name'], user_data_json['password'], user_data_json['email'], current_user.id)
 
     return success_response(message='Profile updated successfully')
 
