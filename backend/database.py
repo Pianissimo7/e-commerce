@@ -18,20 +18,9 @@ def get_user_by_email(email):
         # email is used for the id as it is the primary key
         return User(user["email"], user["name"], user["email"], user["password"])
     return None
-    
 
 def user_exists(email):
-    connection = mysql.connector.connect(**db_config)
-    cursor = connection.cursor()
-
-    check_query = "SELECT * FROM users WHERE email = %s"
-    cursor.execute(check_query, (email,))
-    existing_user = cursor.fetchone()
-
-    cursor.close()
-    connection.close()
-
-    return existing_user is not None
+    return get_user_by_email(email) is not None
 
 def add_user(name, email, password):
 
