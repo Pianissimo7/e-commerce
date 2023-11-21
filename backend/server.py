@@ -33,7 +33,6 @@ def error_response(message, status_code):
 def register():
     user_data_json = request.get_json()
 
-    # Check if the user with the given email already exists
     if user_exists(user_data_json['email']):
         print(f"User with email {user_data_json['email']} already exists.")
         return error_response('Email already taken', 401)
@@ -49,7 +48,6 @@ def login():
     login_data_json = request.get_json()
     user = get_user_by_email(login_data_json['email'])
 
-    # Check if the user exists and the password is correct
     if user and user.password == login_data_json['password']:
         login_user(user)
         return success_response(message='Login successful')
@@ -62,7 +60,6 @@ def login():
 def edit_profile():
     user_data_json = request.get_json()
 
-    # Check if the new email is already in use by another user
     if current_user.email != user_data_json['email'] and user_exists(user_data_json['email']):
         print(f"User with email {user_data_json['email']} already exists.")
         return error_response('email is already in use', 401)
