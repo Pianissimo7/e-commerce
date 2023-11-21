@@ -70,3 +70,37 @@ def update_user(new_name, new_password, new_email, current_email):
 
     cursor.close()
     connection.close()
+
+def add_product(sku, name, description, price, image):
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor()
+
+    insert_query = "INSERT INTO products (sku, name, description, price, image) VALUES (%s, %s, %s, %s, %s)"
+    product_data = (sku, name, description, price, image)
+    cursor.execute(insert_query, product_data)
+    connection.commit()
+    
+    cursor.close()
+    connection.close()
+
+def update_product(sku, new_name, new_description, new_price, image):
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor()
+
+    update_query = "UPDATE products SET name = %s, description = %s, price = %s, image = %s WHERE sku = %s"
+    cursor.execute(update_query, (new_name, new_description, new_price, image, current_sku))
+    connection.commit()
+
+    cursor.close()
+    connection.close()
+
+def remove_product(sku):
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor()
+
+    update_query = "DELETE FROM products WHERE sku = %s"
+    cursor.execute(update_query, (sku))
+    connection.commit()
+
+    cursor.close()
+    connection.close()

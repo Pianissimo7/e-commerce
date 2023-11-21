@@ -68,5 +68,30 @@ def edit_profile():
 
     return success_response(message='Profile updated successfully')
 
+# Route for handling new product requests
+@app.route('/add_product', methods=['POST'])
+def add_product():
+    product_data_json = request.get_json()
+    
+    add_product(product_data_json['sku'], product_data_json['name'], product_data_json['description'], product_data_json['price'], product_data_json['image'])
+    return success_response(message='Product registered successfully')
+
+# Route for handling edit product requests
+@app.route('/edit_product', methods=['POST'])
+def edit_product():
+    product_data_json = request.get_json()
+    
+    update_product(product_data_json['sku'], product_data_json['name'], product_data_json['description'], product_data_json['price'], product_data_json['image'])
+    return success_response(message='Product updated successfully')
+
+# Route for handling delete product requests
+@app.route('/delete_product', methods=['POST'])
+def edit_product():
+    product_data_json = request.get_json()
+    
+    delete_product(product_data_json['sku'])
+    return success_response(message='Product deleted successfully')
+
 if __name__ == '__main__':
     app.run(debug=True)
+
