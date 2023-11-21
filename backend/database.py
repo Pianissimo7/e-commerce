@@ -11,17 +11,14 @@ def get_user_by_email(email):
     cursor.execute(select_query, (email,))
     user = cursor.fetchone()
 
+    cursor.close()
+    connection.close()
+    
     if user:
-        column_names = [column[0] for column in cursor.description]
-        user_dict = {column: value for column, value in zip(column_names, user)}
-
-        cursor.close()
-        connection.close()
-
         # email is used for the id as it is the primary key
-        return User(user_dict["email"], user_dict["name"], user_dict["email"], user_dict["password"])
-    else:
-        return None
+        return User(user["email"], user["name"], user["email"], user["password"])
+    return None
+    
 
 def user_exists(email):
     connection = mysql.connector.connect(**db_config)
