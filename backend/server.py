@@ -31,7 +31,7 @@ def error_response(message, status_code):
 # Route for handling registration requests
 @app.route('/register', methods=['POST'])
 def register():
-    user_data_json = request.get_json()
+    user_data_json = request.json()
 
     if user_exists(user_data_json['email']):
         print(f"User with email {user_data_json['email']} already exists.")
@@ -45,7 +45,7 @@ def register():
 # Route for handling login requests
 @app.route('/login', methods=['POST'])
 def login():
-    login_data_json = request.get_json()
+    login_data_json = request.json()
     user = get_user_by_email(login_data_json['email'])
 
     if user and user.password == login_data_json['password']:
@@ -58,8 +58,7 @@ def login():
 @app.route('/edit_profile', methods=['POST'])
 @login_required
 def edit_profile():
-    user_data_json = request.get_json()
-    # user_data_json = request.json()
+    user_data_json = request.json()
 
     if current_user.email != user_data_json['email'] and user_exists(user_data_json['email']):
         print(f"User with email {user_data_json['email']} already exists.")
