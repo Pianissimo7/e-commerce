@@ -1,4 +1,4 @@
-export const login = (onLogin) => {
+export const login = () => {
     var email = document.getElementById('email').value;
     var password = document.getElementById('password').value;
     var loginError = document.getElementById('loginError');
