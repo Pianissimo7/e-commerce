@@ -3,17 +3,21 @@ from flask_login import LoginManager, login_user, current_user, login_required
 import os
 from dotenv import load_dotenv
 from user import User
-from database import *
+from database import Database
+import signal
+import sys
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("APP_SECRET_KEY")
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+db_singleton = Database()
+
 @login_manager.user_loader
 def load_user(id):
 
-    user = get_user_by_id(id)
+    user = db_singleton.get_user_by_id(id)
     
     return user
 
@@ -31,13 +35,13 @@ def error_response(message, status_code):
 # Route for handling registration requests
 @app.route('/register', methods=['POST'])
 def register():
-    user_data_json = request.json()
+    user_data_json = request.json
 
-    if user_exists(user_data_json['email'], user_data_json['password']):
-        print(f"User with name {user_data_json['name']} and email {user_data_json['email']} already exists.")
+    if db_singleton.user_exists(user_data_json['email'], user_data_json['password']):
+        print(f"User with email: {user_data_json['email']} already exists.")
         return error_response('Email already taken', 401)
     else:
-        add_user(user_data_json['name'], user_data_json['email'], user_data_json['password'])
+        db_singleton.add_user(user_data_json['name'], user_data_json['email'], user_data_json['password'])
         print(f"User {user_data_json['name']} registered successfully.")
 
     return success_response(message='Registration successful')
@@ -46,7 +50,7 @@ def register():
 @app.route('/login', methods=['POST'])
 def login():
     login_data_json = request.json
-    user = get_user_by_email_pass(login_data_json['email'], login_data_json['password'])
+    user = db_singleton.get_user_by_email_pass(login_data_json['email'], login_data_json['password'])
 
     if user and user.password == login_data_json['password']:
         login_user(user)
@@ -60,14 +64,18 @@ def login():
 def edit_profile():
     user_data_json = request.json
 
-    taken_user = get_user_by_email_pass(user_data_json['email'], user_data_json['password'])
+    taken_user = db_singleton.get_user_by_email_pass(user_data_json['email'], user_data_json['password'])
     if taken_user is not None and taken_user.id != current_user.id:
         print(f"User with name {user_data_json['name']} and email {user_data_json['email']} already exists.")
         return error_response('Email is already in use', 401)
 
-    update_user(user_data_json['name'], user_data_json['password'], user_data_json['email'], current_user.id)
+    db_singleton.update_user(user_data_json['name'], user_data_json['password'], user_data_json['email'], current_user.id)
 
     return success_response(message='Profile updated successfully')
+
+def cleanup_before_exit(signum, frame):
+    db_singleton.close_connection()
+    sys.exit(0)
 
 if __name__ == '__main__':
     app.run(debug=True)

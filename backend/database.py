@@ -3,63 +3,54 @@ import mysql.connector
 from user import User
 from consts import db_config
 
-def get_user_by_id(id):
-    connection = mysql.connector.connect(**db_config)
-    cursor = connection.cursor()
+class Database:
+    _instance = None
 
-    select_query = "SELECT * FROM users WHERE id = %s"
-    cursor.execute(select_query, (id,))
-    user = cursor.fetchone()
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(Database, cls).__new__(cls, *args, **kwargs)
+            cls._instance.initialize()
+        return cls._instance
 
-    cursor.close()
-    connection.close()
-    
-    if user:
-        return User(*user)
-    return None
+    def initialize(self):
+        self.connection = mysql.connector.connect(**db_config)
+        self.cursor = self.connection.cursor()
 
-def user_exists(id):
-    return get_user_by_id(id) is not None
-
-def get_user_by_email_pass(email, password):
-    connection = mysql.connector.connect(**db_config)
-    cursor = connection.cursor()
-
-    select_query = "SELECT * FROM users WHERE email = %s AND password = %s"
-    cursor.execute(select_query, (email, password))
-    user = cursor.fetchone()
-
-    cursor.close()
-    connection.close()
-    
-    if user:
-        return User(*user)
-    return None
-
-def user_exists(email, password):
-    
-    return get_user_by_email_pass(email, password) is not None
+    def get_user_by_id(self, id):
+        select_query = "SELECT * FROM users WHERE id = %s"
+        self.cursor.execute(select_query, (id,))
+        user = self.cursor.fetchone()
         
-def add_user(name, email, password):
+        if user:
+            return User(*user)
+        return None
 
-    connection = mysql.connector.connect(**db_config)
-    cursor = connection.cursor()
+    def user_exists(self, id):
+        return self.get_user_by_id(id) is not None
 
-    insert_query = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
-    user_data = (name, email, password)
-    cursor.execute(insert_query, user_data)
-    connection.commit()
-    
-    cursor.close()
-    connection.close()
+    def get_user_by_email_pass(self, email, password):
+        select_query = "SELECT * FROM users WHERE email = %s AND password = %s"
+        self.cursor.execute(select_query, (email, password))
+        user = self.cursor.fetchone()
 
-def update_user(new_name, new_password, new_email, id):
-    connection = mysql.connector.connect(**db_config)
-    cursor = connection.cursor()
+        if user:
+            return User(*user)
+        return None
 
-    update_query = "UPDATE users SET name = %s, password = %s, email = %s WHERE id = %s"
-    cursor.execute(update_query, (new_name, new_password, new_email, id))
-    connection.commit()
+    def user_exists(self, email, password):
+        return self.get_user_by_email_pass(email, password) is not None
+            
+    def add_user(self, name, email, password):
+        insert_query = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
+        user_data = (name, email, password)
+        self.cursor.execute(insert_query, user_data)
+        self.connection.commit()
 
-    cursor.close()
-    connection.close()
+    def update_user(self, new_name, new_password, new_email, id):
+        update_query = "UPDATE users SET name = %s, password = %s, email = %s WHERE id = %s"
+        self.cursor.execute(update_query, (new_name, new_password, new_email, id))
+        self.connection.commit()
+
+    def close_connection(self):
+        self.cursor.close()
+        self.connection.close()
