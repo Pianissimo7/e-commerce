@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 backend/*.env
 backend/__pycache__
 frontend
 *.pyc
 .idea
+=======
+node_modules
+.idea
+>>>>>>> frontend
